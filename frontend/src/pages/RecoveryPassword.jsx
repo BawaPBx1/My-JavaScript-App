@@ -3,12 +3,29 @@ import ForgotPasswordImg from '../assets/forgot-password-1.jpeg';
 import ForgotPasswordImgDark from '../assets/forgot-password-1-dark.jpeg';
 import { Header, PageHeadings, InputBox } from '../components';
 import { ToastContainer, toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
-function ForgotPassword() {
+function RecoveryPassword() {
+  const { resetToken } = useParams();
+  const userInfo = jwtDecode(resetToken)
+  const currentTime = Math.floor(Date.now() / 1000);
   const navigate = useNavigate();
+  // isTokenExpired = currentTime > userInfo.exp;
+
+  if (currentTime > userInfo.exp) {
+    toast.error("Your token has expired!");
+    setTimeout(() => { navigate('/forgot-password'); setUser(formResp.user); }, 2000);
+    return;
+  }
+
+  console.log("checking resetToken for forgot password : ", userInfo)
+
+  
   const [formData, setFormData] = useState({
-    email: ''
+    // email: '',
+    email: userInfo.email,
+    password: '',
   })
 
   const handleOnChangeValues = (e) => {
@@ -16,7 +33,8 @@ function ForgotPassword() {
 
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'email' ? value.toLowerCase() : value
+      // email: userInfo.email,
+      [name]: value
     }));
     
     
@@ -29,17 +47,27 @@ function ForgotPassword() {
 
   const forgotSubmitHandle = async (e) => {
     e.preventDefault();
+    // alert("You have submitted the new password!");
+    toast.success(`You have submitted the new password!`)
+    console.log("You have submitted the new password! : ", formData)
+    // return;
     // toast.success("You are submitting the Forgot password form!");
     // console.log("You are submitting the Forgot password form!");
     try {
-      const resp = await fetch('/api/forgot-password', {
+      const resp = await fetch(`/api/reset-password/${resetToken}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(formData)
       });
-      const formResp = await resp.json();
+      // const formResp = await resp.json();
+      let formResp = {};
+      if (resp.headers.get("content-type")?.includes("application/json")) {
+        formResp = await resp.json();
+      } else {
+        console.warn("Non-JSON response received");
+      }
       
       // console.log("Response from server:", resp, formResp);
       toast.success(formResp.message, {
@@ -48,9 +76,9 @@ function ForgotPassword() {
         hideProgressBar: false,
         theme: "colored",
       });
-      setTimeout(()=>{navigate('/')}, 2000)
+      setTimeout(() => { navigate('/login')}, 2000);
     } catch (error) {
-      console.error("Error while recovering the password :", error);
+      console.error("Error while changing your password :", error);
     }
   }
 
@@ -68,18 +96,19 @@ function ForgotPassword() {
             <div className="flex items-center justify-center p-6 sm:p-12 md:w-1/2">
               <div className="w-full">
                 <h1 className="mb-4 text-xl- text-4xl font-semibold text-gray-700 dark:text-gray-200">
-                  Forgot password
+                  Reset Your Password
                 </h1>
                 <form onSubmit={forgotSubmitHandle}>
                   {/* <label className="block text-sm">
                     <span className="text-gray-700 dark:text-gray-400">Email</span>
                     <input className="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input border p-2 rounded-md" placeholder="Jane Doe" />
                   </label> */}
-                  <InputBox label="Email" name="email" type='email' placeholder="user@example.com" onChange={handleOnChangeValues} />
+                  <InputBox label="Password" name="password" type='password' placeholder="********" onChange={handleOnChangeValues} />
+                  <InputBox label="Confirm Password" name="confirm_password" type='password' placeholder="********" onChange={handleOnChangeValues} />
 
                   {/* <!-- You should use a button here, as the anchor is only used for the example  --> */}
                   <button type='submit' className="block w-full px-4 py-2 mt-4 text-sm font-medium leading-5 text-center text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
-                    Recover password
+                    Submit
                   </button>
                 </form>
               </div>
@@ -91,4 +120,4 @@ function ForgotPassword() {
   )
 }
 
-export default ForgotPassword
+export default RecoveryPassword

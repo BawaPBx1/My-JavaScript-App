@@ -18,6 +18,11 @@ export const addUser = async (user) => {
   return {...addedUser[0], ...safeUserInfo};
 };
 
+export const verifyDuplicateUser = async (email) => {
+  const user = await db("users").where({ email }).first();
+  return !!user;
+}
+
 export const getUser = async ({ email, password }) => {
   // console.log("getUser called model with email:", email);
   // const user = await db("users").where({ email }).first();
@@ -48,6 +53,10 @@ export const getUser = async ({ email, password }) => {
 
 export const updateUser = async (id, updatedData) => {
   return await db("users").where({ id }).update(updatedData);
+};
+
+export const getUsers = async (email) => {
+  return await db("users").select("id", "firstName", "lastName", "email", "passwordRecoveryToken").where({ email }).first();
 };
 
 export const deleteUser = async (id) => {

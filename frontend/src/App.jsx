@@ -4,15 +4,18 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import { Routes, Route } from 'react-router-dom';
 import {Header, HeaderDark, Message, PageHeadings} from './components/'
-import { Home, Company, Features, Marketplace, Product, Login, Register, PageNotFound, ForgotPassword } from './pages';
+import { Home, Company, Features, Marketplace, Product, Login, Register, PageNotFound, ForgotPassword, RecoveryPassword } from './pages';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
 
 
 function App() {
   const [count, setCount] = useState(0);
    const [data, setData] = useState(null);
+
+  //  console.log("checking the process.env frontend : ", import.meta.env.VITE_GOOGLE_CLIENT_ID)
 
   useEffect(() => {
     const fetchProtectedData = async () => {
@@ -57,6 +60,7 @@ function App() {
 
   return (
     <>
+    <GoogleOAuthProvider clientId={ import.meta.env.VITE_GOOGLE_CLIENT_ID }>
       <Header />
       {/* <Message /> */}
       {/* <PageHeadings pageHeading="Home Page" /> */}
@@ -69,10 +73,12 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:resetToken" element={<RecoveryPassword />} />
         <Route path="/api/message" element={<Home />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
       <ToastContainer position="bottom-right"/>
+      </GoogleOAuthProvider>
     </>
   )
 }

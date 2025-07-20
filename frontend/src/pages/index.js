@@ -7,5 +7,6 @@ import Marketplace from "./Marketplace";
 import PageNotFound from "./PageNotFound";
 import Product from "./Product";
 import Register from "./Register";
+import RecoveryPassword from "./RecoveryPassword";
 
-export { Home, Company, Features, Marketplace, Product, Login, Register, PageNotFound, ForgotPassword };
+export { Home, Company, Features, Marketplace, Product, Login, Register, PageNotFound, ForgotPassword, RecoveryPassword };

@@ -1,7 +1,7 @@
 import express from 'express';
 import { addUserHandler, getUserHandler } from '../controllers/userController.js';
 import { logoutUserHandler } from '../controllers/userAuthenticateController.js';
-import { forgotPasswordHandler } from '../controllers/forgotPasswordController.js';
+import { forgotPasswordHandler, resetPasswordHandler } from '../controllers/forgotPasswordController.js';
 
 const router = express.Router();
 
@@ -9,6 +9,7 @@ router.post('/register', addUserHandler);
 router.post('/login', getUserHandler);
 router.post('/logout', logoutUserHandler);
 router.post('/forgot-password', forgotPasswordHandler);
+router.post('/reset-password/:token', resetPasswordHandler);
 
 export default router;
 

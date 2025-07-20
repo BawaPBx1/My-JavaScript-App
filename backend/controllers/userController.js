@@ -1,4 +1,4 @@
-import { addUser, getUser } from '../models/userModel.js';
+import { addUser, getUser, verifyDuplicateUser } from '../models/userModel.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -10,18 +10,39 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_jwt_secret';
 
 
 export const addUserHandler = async (req, res) => {
-  console.log("User route loaded");
+  // console.log("User route loaded");
   // console.log("Adding user route:", req.body);
   // return;
   const { firstName, lastName, email, password, acceptTerms } = req.body;
+
+  if (!firstName || !lastName || !email || !password || acceptTerms === undefined) {
+    // Send error with status 400 and descriptive message
+    return res.status(400).json({ error: 'All fields are required' });
+  }
   try {
+    const isDuplicate = await verifyDuplicateUser(email);
+    console.log("Checking for duplicate user:", isDuplicate);
+
+    if (isDuplicate) {
+      // Send error with status 409 and descriptive message
+      return res.status(409).json({ message: 'User already exists' });
+    }
+
     const user = await addUser({ firstName, lastName, email, password, acceptTerms });
     res.status(201).json(user);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to add user' });
-    // res.status(500).json({ error: error || 'Failed to add user' });
-    // console.error("Error adding user:", error);
+    console.error("Error in addUserHandler:", error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
+
+  // try {
+  //   const user = await addUser({ firstName, lastName, email, password, acceptTerms });
+  //   res.status(201).json(user);
+  // } catch (error) {
+  //   res.status(500).json({ error: 'Failed to add user' });
+  //   // res.status(500).json({ error: error || 'Failed to add user' });
+  //   // console.error("Error adding user:", error);
+  // }
 };
 
 export const getUserHandler = async (req, res) => {
